@@ -1,24 +1,27 @@
 package edu.cnm.deepdive.diceware.repository
 
+import edu.cnm.deepdive.diceware.configuration.DicewareConfiguration
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Service
 
 @Service
 class DicewareWordListRepository(
-    @Value("\${diceware.word-list}") wordListFile: String,
+    configuration: DicewareConfiguration,
     resourceLoader: ResourceLoader
 ) : WordRepository {
 
     private val words: List<String>
 
     init {
-val resource = resourceLoader.getResource(wordListFile)
+        val wordListFile: String = configuration.wordListFile
+        val resource = resourceLoader.getResource(wordListFile)
         words = resource.inputStream
             .bufferedReader()
             .useLines { lines ->
                 lines
-                    .filter {lineRegex.matches(it) }
+                    .filter { lineRegex.matches(it) }
                     .map { lineRegex.replace(it, "$1") }
                     .toList()
             }
@@ -31,4 +34,5 @@ val resource = resourceLoader.getResource(wordListFile)
     override fun get(index: Int): String =
         words[index]
 }
+
 private val lineRegex = Regex("^\\s*\\d+\\s+(\\S+).*?$")
